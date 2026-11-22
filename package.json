@@ -1,0 +1,32 @@
+{
+  "name": "carga-academica-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "API del Sistema de Carga Académica y Horarios",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check:db": "node scripts/check-db.js",
+    "test": "node --test test/*.test.js",
+    "migrate": "node scripts/run-migrations.js",
+    "init:operator": "node scripts/init-operator.js",
+    "test:integration": "node scripts/test-integration.js"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pg": "^8.17.2",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.7",
+    "exceljs": "^4.4.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
+  }
+}

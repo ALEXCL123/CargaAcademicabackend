@@ -1,0 +1,50 @@
+import * as catalog from '../services/catalog.service.js';
+import { deleteCourse, inspectCourseDeletion } from '../services/course-deletion.service.js';
+import * as load from '../services/load.service.js';
+import * as schedule from '../services/schedule.service.js';
+import * as documents from '../services/documents.service.js';
+import * as fusion from '../services/fusion.service.js';
+import * as reports from '../services/reports.service.js';
+
+const send = (res, content, mime, filename) => res.type(mime).attachment(filename).send(content);
+export const config = async (req,res) => res.json(await catalog.getConfig());
+export const editConfig = async (req,res) => res.json(await catalog.saveConfig(req.body));
+export const periods = async (req,res) => res.json(await catalog.listPeriods());
+export const savePeriod = async (req,res) => res.status(req.params.id ? 200 : 201).json(await catalog.savePeriod(req.body,req.params.id));
+export const activatePeriod = async (req,res) => res.json(await catalog.activatePeriod(req.params.id));
+export const closePeriod = async (req,res) => res.json(await schedule.closePeriod(req.params.id));
+export const list = async (req,res) => res.json(await catalog.list(req.params.resource,req.query));
+export const detail = async (req,res) => res.json(await catalog.detail(req.params.resource,req.params.id));
+export const save = async (req,res) => res.status(req.params.id ? 200 : 201).json(await catalog.save(req.params.resource,req.body,req.params.id));
+export const remove = async (req,res) => { await catalog.remove(req.params.resource,req.params.id); res.sendStatus(204); };
+export const uploadPdf = async (req,res) => res.json(await documents.uploadPdf(req.params.id,req.get('X-Filename'),req.body));
+export const readPdf = async (req,res) => send(res,await documents.readPdf(req.params.id),'application/pdf','documento.pdf');
+export const staff = async (req,res) => res.status(req.params.id ? 200 : 201).json(await catalog.saveStaff(req.params.period,req.body,req.params.id));
+export const saveCourse = async (req,res) => res.status(req.params.id ? 200 : 201).json(await catalog.saveCourse(req.body,req.params.id));
+export const courseDeletionImpact = async (req,res) => res.json(await inspectCourseDeletion(req.params.id));
+export const removeCourse = async (req,res) => { await deleteCourse(req.params.id,req.body?.revision); res.sendStatus(204); };
+export const changeCourseOffers = async (req,res) => res.json(await catalog.changeCourseOffers(req.params.period,req.body));
+export const offerCourses = async (req,res) => res.json(await catalog.offerCourses(req.params.period,req.body));
+export const fusions = async (req,res) => res.json(await fusion.listFusions(req.params.period));
+export const removeFusion = async (req,res) => { await fusion.removeFusion(req.params.period,req.params.id); res.sendStatus(204); };
+export const authorizeFusion = async (req,res) => res.status(req.params.id ? 200 : 201).json(await fusion.authorizeFusion(req.params.period,req.body,req.params.id));
+export const readLoad = async (req,res) => res.json(await load.getLoad(req.params.period));
+export const saveAssignment = async (req,res) => res.status(req.params.id ? 200 : 201).json(await load.saveAssignment(req.params.period,req.body,req.params.id));
+export const removeAssignment = async (req,res) => { await load.removeAssignment(req.params.period,req.params.id,req.body); res.sendStatus(204); };
+export const completeLoad = async (req,res) => res.json(await load.completeLoad(req.params.period));
+export const readSchedule = async (req,res) => res.json(await schedule.getSchedule(req.params.period));
+export const saveExternalClass = async (req,res) => res.status(req.params.id ? 200 : 201)
+  .json(await load.saveAssignment(req.params.period,{...req.body,modalidad:'REGULAR'},req.params.id,{external:true}));
+export const removeExternalClass = async (req,res) => {
+  await load.removeAssignment(req.params.period,req.params.id,req.body,{external:true});
+  res.sendStatus(204);
+};
+export const saveSession = async (req,res) => res.status(req.params.id ? 200 : 201).json(await schedule.saveSession(req.params.period,req.body,req.params.id));
+export const removeSession = async (req,res) => { await schedule.removeSession(req.params.period,req.params.id); res.sendStatus(204); };
+export const propose = async (req,res) => res.json(await schedule.proposeSchedule(req.params.period,req.body));
+export const apply = async (req,res) => res.json(await schedule.applySchedule(req.params.period,req.body));
+export const previewLoad = async (req,res) => res.json(await reports.loadReport(req.params.period));
+export const exportLoad = async (req,res) => send(res,await reports.exportLoad(req.params.period),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','carga-academica.xlsx');
+export const previewSchedule = async (req,res) => res.json(await reports.scheduleReport(req.params.period,req.params.career));
+export const exportSchedule = async (req,res) => send(res,await reports.exportSchedule(req.params.period,req.params.career,req.body?.documentos,req.body?.posicion),'application/pdf','horarios.pdf');
+
